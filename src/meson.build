@@ -6,7 +6,6 @@ sdk_sources = files('busymate-bridge.c', 'busymate-microphone.c')
 # The WebKit-free pipe, linked into the library and the unit tests.
 core_lib = static_library('busymate-core', core_sources,
   dependencies: [glib_dep, gio_dep, json_dep],
-  c_args: ['-DBUSYMATE_COMPILATION'],
   pic: true)
 core_dep = declare_dependency(link_with: core_lib,
   include_directories: include_directories('.'),
@@ -16,7 +15,7 @@ sdk_deps = [glib_dep, gobject_dep, gio_dep, json_dep, gtk_dep, webkit_dep]
 sdk_lib = library('busymate-ai-sdk-@0@'.format(api_version), sdk_sources,
   link_whole: core_lib,
   dependencies: sdk_deps,
-  c_args: ['-DBUSYMATE_COMPILATION', '-DG_LOG_DOMAIN="Busymate"'],
+  c_args: ['-DG_LOG_DOMAIN="Busymate"'],
   version: meson.project_version(),
   install: true)
 

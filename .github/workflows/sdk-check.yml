@@ -32,13 +32,13 @@ jobs:
       - name: Verify immutable source
         run: python3 scripts/verify-release.py
       - name: Configure
-        run: meson setup _build --prefix=/usr --libdir=lib --buildtype=release -Dintrospection=enabled
+        run: meson setup _build --prefix=/usr --libdir=lib --buildtype=release -Dintrospection=enabled -Dwerror=true
       - name: Build SDK, introspection data, tests and example app
         run: meson compile -C _build
       - name: Unit tests (message parsing, origin checks, example settings and mint client)
-        run: meson test -C _build --suite unit --print-errorlogs
+        run: meson test -C _build --suite unit --print-errorlogs -v
       - name: WebKitGTK integration tests under Xvfb
-        run: dbus-run-session -- xvfb-run -a -s "-screen 0 1280x1024x24" meson test -C _build --suite webkit --print-errorlogs
+        run: dbus-run-session -- xvfb-run -a -s "-screen 0 1280x1024x24" meson test -C _build --suite webkit --print-errorlogs -v
       - name: Introspection (Python GI) check
         run: |
           GI_TYPELIB_PATH=_build/src LD_LIBRARY_PATH=_build/src xvfb-run -a python3 - <<'PY'
@@ -56,8 +56,8 @@ jobs:
       - name: Install, package and build a consumer against the installed SDK
         run: |
           DESTDIR="$PWD/dist/root" meson install -C _build
-          export PKG_CONFIG_SYSROOT_DIR="$PWD/dist/root" PKG_CONFIG_PATH="$PWD/dist/root/usr/lib/pkgconfig"
-          gcc tests/consumer/consumer.c -o dist/consumer $(pkg-config --cflags --libs busymate-ai-sdk-1)
+          export PKG_CONFIG_PATH="$PWD/dist/root/usr/lib/pkgconfig"
+          gcc tests/consumer/consumer.c -o dist/consumer $(pkg-config --define-prefix --cflags --libs busymate-ai-sdk-1)
           LD_LIBRARY_PATH="$PWD/dist/root/usr/lib" dist/consumer
           tar -C dist/root -czf "dist/busymate-ai-sdk-linux-1.0.0-ubuntu24.04-$(uname -m).tar.gz" usr
           meson dist -C _build --no-tests --formats xztar --allow-dirty

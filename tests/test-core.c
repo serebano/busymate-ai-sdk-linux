@@ -27,15 +27,6 @@ signed_in (gpointer data)
   return g_strdup (data);
 }
 
-static JsonObject *
-parse (const char *json)
-{
-  g_autoptr(JsonParser) parser = json_parser_new ();
-
-  g_assert_true (json_parser_load_from_data (parser, json, -1, NULL));
-  return json_object_ref (json_node_get_object (json_parser_get_root (parser)));
-}
-
 static BusymateRoute
 handle (const char *raw, const char *origin, const char *account, char **reply, BusymateCall **call)
 {
