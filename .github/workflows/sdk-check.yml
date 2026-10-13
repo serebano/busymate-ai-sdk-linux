@@ -64,14 +64,14 @@ jobs:
           sed "s|^prefix=.*|prefix=$PWD/dist/root/usr|" dist/root/usr/lib/pkgconfig/busymate-ai-sdk-1.pc > dist/pc/busymate-ai-sdk-1.pc
           gcc tests/consumer/consumer.c -o dist/consumer $(PKG_CONFIG_PATH="$PWD/dist/pc" pkg-config --cflags --libs busymate-ai-sdk-1)
           LD_LIBRARY_PATH="$PWD/dist/root/usr/lib" dist/consumer
-          tar -C dist/root -czf "dist/busymate-ai-sdk-linux-1.0.0-ubuntu24.04-$(uname -m).tar.gz" usr
+          tar -C dist/root -czf "dist/busymate-ai-sdk-linux-1.0.1-ubuntu24.04-$(uname -m).tar.gz" usr
           meson dist -C _build --no-tests --formats xztar --allow-dirty
           cp _build/meson-dist/*.tar.xz* dist/
           cp release-manifest.json dist/
           (cd dist && sha256sum busymate-ai-sdk-linux-*.tar.* release-manifest.json > SHA256SUMS && cat SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
-          name: busymate-ai-sdk-linux-1.0.0
+          name: busymate-ai-sdk-linux-1.0.1
           path: |
             dist/busymate-ai-sdk-linux-*.tar.*
             dist/release-manifest.json

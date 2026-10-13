@@ -28,10 +28,11 @@ G_BEGIN_DECLS
 #define BUSYMATE_SCRIPT_WORLD "busymate"
 /** BUSYMATE_PLATFORM: `platform` reported in `hello`. */
 #define BUSYMATE_PLATFORM "linux"
-/** BUSYMATE_CHANNEL: hosted chat `channel` query value for desktop hosts. */
-#define BUSYMATE_CHANNEL "desktop"
+/** BUSYMATE_CHANNEL: hosted chat `channel` query value for third-party desktop SDK hosts
+ * (`desktop` is reserved for Busymate's own Console app; `embed` needs a parent frame). */
+#define BUSYMATE_CHANNEL "desktop_sdk"
 /** BUSYMATE_DEFAULT_CHAT_URL: the public guest support chat used by the example. */
-#define BUSYMATE_DEFAULT_CHAT_URL "https://busymate.ai/support/busyproxy?channel=desktop&locale=en"
+#define BUSYMATE_DEFAULT_CHAT_URL "https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en"
 
 char  *busymate_normalize_origin      (const char         *origin);
 char **busymate_allowed_origins       (const char         *assistant,

@@ -8,7 +8,7 @@
 G_BEGIN_DECLS
 
 #define DEMO_DEFAULT_ASSISTANT "busyproxy"
-#define DEMO_DEFAULT_CHAT_URL "https://busymate.ai/support/busyproxy?channel=desktop&locale=en"
+#define DEMO_DEFAULT_CHAT_URL "https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en"
 #define DEMO_DEFAULT_LOCALE "en"
 #define DEMO_DEFAULT_ORIGINS "https://busymate.ai"
 

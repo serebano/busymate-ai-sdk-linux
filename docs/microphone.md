@@ -25,7 +25,7 @@ const char *origins[] = { "https://YOUR_ASSISTANT.busymate.ai", NULL };
 BusymateMicrophone *microphone = busymate_microphone_new (web_view, origins);
 webkit_settings_set_enable_webrtc (webkit_web_view_get_settings (web_view), TRUE); /* voice mode */
 /* Configure your identity bridge before loading the chat too. */
-webkit_web_view_load_uri (web_view, "https://YOUR_ASSISTANT.busymate.ai/?channel=desktop");
+webkit_web_view_load_uri (web_view, "https://YOUR_ASSISTANT.busymate.ai/?channel=desktop_sdk");
 ```
 
 This is native app code: integrating it requires your app's own release. Apps without the adapter keep WebKitGTK's default behaviour, which **denies** media requests that no `permission-request` handler allows.

@@ -32,7 +32,7 @@ test_defaults (void)
   g_autoptr(DemoValidated) valid = validate (config, -1);
 
   g_assert_cmpstr (valid->assistant, ==, "busyproxy");
-  g_assert_cmpstr (valid->chat_url, ==, "https://busymate.ai/support/busyproxy?channel=desktop&locale=en");
+  g_assert_cmpstr (valid->chat_url, ==, "https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en");
   g_assert_cmpuint (g_strv_length (valid->origins), ==, 1);
   g_assert_cmpstr (valid->origins[0], ==, "https://busymate.ai");
   g_assert_null (valid->mint_url);
@@ -43,16 +43,16 @@ test_defaults (void)
 static void
 test_locale (void)
 {
-  g_autofree char *a = demo_url_with_locale ("https://busymate.ai/support/x?channel=desktop&locale=en", "de");
-  g_autofree char *b = demo_url_with_locale ("https://busymate.ai/support/x?channel=desktop", "pt-BR");
+  g_autofree char *a = demo_url_with_locale ("https://busymate.ai/support/x?channel=desktop_sdk&locale=en", "de");
+  g_autofree char *b = demo_url_with_locale ("https://busymate.ai/support/x?channel=desktop_sdk", "pt-BR");
   g_autofree char *c = demo_url_with_locale ("https://busymate.ai/support/x", "fr");
-  g_autofree char *d = demo_url_with_locale ("https://busymate.ai/support/x?locale=en&channel=desktop&locale=it", "es");
+  g_autofree char *d = demo_url_with_locale ("https://busymate.ai/support/x?locale=en&channel=desktop_sdk&locale=it", "es");
   g_autoptr(DemoConfig) config = demo_config_new_default ();
 
-  g_assert_cmpstr (a, ==, "https://busymate.ai/support/x?channel=desktop&locale=de");
-  g_assert_cmpstr (b, ==, "https://busymate.ai/support/x?channel=desktop&locale=pt-BR");
+  g_assert_cmpstr (a, ==, "https://busymate.ai/support/x?channel=desktop_sdk&locale=de");
+  g_assert_cmpstr (b, ==, "https://busymate.ai/support/x?channel=desktop_sdk&locale=pt-BR");
   g_assert_cmpstr (c, ==, "https://busymate.ai/support/x?locale=fr");
-  g_assert_cmpstr (d, ==, "https://busymate.ai/support/x?locale=es&channel=desktop");
+  g_assert_cmpstr (d, ==, "https://busymate.ai/support/x?locale=es&channel=desktop_sdk");
   g_free (config->locale);
   config->locale = g_strdup ("en&admin=1");
   g_assert_null (validate (config, DEMO_CONFIG_ERROR_LOCALE));
