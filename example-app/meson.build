@@ -1,5 +1,3 @@
-soup_dep = dependency('libsoup-3.0', version: '>= 3.0')
-
 demo_lib = static_library('demo-config', 'src/demo-config.c',
   dependencies: [glib_dep, gio_dep, json_dep, soup_dep])
 demo_dep = declare_dependency(link_with: demo_lib,

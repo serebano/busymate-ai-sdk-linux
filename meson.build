@@ -23,6 +23,7 @@ gio_dep = dependency('gio-2.0', version: '>= 2.76')
 json_dep = dependency('json-glib-1.0', version: '>= 1.6')
 gtk_dep = dependency('gtk4', version: '>= 4.10')
 webkit_dep = dependency('webkitgtk-6.0', version: '>= 2.42')
+soup_dep = dependency('libsoup-3.0', version: '>= 3.0', required: get_option('tests') or get_option('example'))
 
 subdir('src')
 if get_option('tests')

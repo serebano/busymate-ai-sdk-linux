@@ -4,6 +4,12 @@
  */
 #include <busymate/busymate.h>
 #include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 typedef struct {
   GtkWindow     *window;
@@ -113,6 +119,13 @@ mint (BusymateBridge *bridge, BusymateMintRequest *request, gpointer data)
   g_assert_cmpstr (busymate_mint_request_get_origin (request), ==, "https://acme.busymate.ai");
   g_assert_cmpstr (busymate_mint_request_get_assistant (request), ==, "acme");
   g_assert_cmpstr (busymate_mint_request_get_audience (request), ==, "busymate-ai");
+  busymate_mint_request_return_token (request, "token-1", busymate_mint_request_get_nonce (request));
+  return TRUE;
+}
+
+static gboolean
+mint_any (BusymateBridge *bridge, BusymateMintRequest *request, gpointer data)
+{
   busymate_mint_request_return_token (request, "token-1", busymate_mint_request_get_nonce (request));
   return TRUE;
 }
@@ -283,6 +296,104 @@ test_microphone_other_origin (Fixture *f, gconstpointer data)
   g_assert_cmpstr (json_object_get_string_member (out, "hasMic"), ==, "undefined");
 }
 
+
+/* ── crash recovery over a real local HTTPS origin ─────────────────────── */
+
+static void
+on_page (SoupServer *server, SoupServerMessage *message, const char *path, GHashTable *query, gpointer data)
+{
+  soup_server_message_set_status (message, 200, NULL);
+  soup_server_message_set_response (message, "text/html", SOUP_MEMORY_STATIC, BRIDGE_PAGE, strlen (BRIDGE_PAGE));
+}
+
+static void
+on_terminated (BusymateBridge *bridge, WebKitWebProcessTerminationReason reason, Fixture *f)
+{
+  g_object_set_data (G_OBJECT (bridge), "reason", GINT_TO_POINTER (reason + 1));
+}
+
+/* Kill our WebKitWebProcess children (CI runs without WebKit's bubblewrap sandbox, so they are direct children). */
+static guint
+kill_web_processes (void)
+{
+  g_autoptr(GDir) proc = g_dir_open ("/proc", 0, NULL);
+  const char *name;
+  guint killed = 0;
+
+  while (proc != NULL && (name = g_dir_read_name (proc)) != NULL)
+    {
+      g_autofree char *path = g_strdup_printf ("/proc/%s/stat", name);
+      g_autofree char *stat = NULL;
+      char *close_paren;
+      int ppid = 0;
+      char state;
+
+      if (!g_ascii_isdigit (*name) || !g_file_get_contents (path, &stat, NULL, NULL))
+        continue;
+      close_paren = strrchr (stat, ')');
+      if (close_paren == NULL || strstr (stat, "(WebKitWebProces") == NULL ||
+          sscanf (close_paren + 2, "%c %d", &state, &ppid) != 2 || ppid != getpid ())
+        continue;
+      if (kill (atoi (name), SIGKILL) == 0)
+        killed++;
+    }
+  return killed;
+}
+
+static void
+test_bridge_crash_restored (Fixture *f, gconstpointer data)
+{
+  const char *cert_path = g_getenv ("BUSYMATE_TEST_TLS_CERT");
+  const char *key_path = g_getenv ("BUSYMATE_TEST_TLS_KEY");
+  g_autoptr(GTlsCertificate) certificate = NULL;
+  g_autoptr(SoupServer) server = NULL;
+  g_autoptr(GError) error = NULL;
+  g_autoptr(JsonObject) first = NULL;
+  g_autoptr(JsonObject) after = NULL;
+  g_autofree char *origin = NULL, *url = NULL;
+  const char *origins[2] = { NULL, NULL };
+  GSList *uris;
+  int port;
+
+  if (cert_path == NULL || key_path == NULL)
+    {
+      g_test_skip ("set BUSYMATE_TEST_TLS_CERT and BUSYMATE_TEST_TLS_KEY (self-signed for localhost)");
+      return;
+    }
+  certificate = g_tls_certificate_new_from_files (cert_path, key_path, &error);
+  g_assert_no_error (error);
+  server = soup_server_new ("tls-certificate", certificate, NULL);
+  soup_server_add_handler (server, "/", on_page, NULL, NULL);
+  g_assert_true (soup_server_listen_local (server, 0, SOUP_SERVER_LISTEN_IPV4_ONLY | SOUP_SERVER_LISTEN_HTTPS, &error));
+  g_assert_no_error (error);
+  uris = soup_server_get_uris (server);
+  port = g_uri_get_port (uris->data);
+  g_slist_free_full (uris, (GDestroyNotify) g_uri_unref);
+  origin = g_strdup_printf ("https://localhost:%d", port);
+  url = g_strdup_printf ("%s/chat", origin);
+  origins[0] = origin;
+  webkit_network_session_allow_tls_certificate_for_host (webkit_web_view_get_network_session (f->view),
+                                                         certificate, "localhost");
+
+  f->bridge = busymate_bridge_new ("acme", origins);
+  g_signal_connect (f->bridge, "get-account", G_CALLBACK (account), f);
+  g_signal_connect (f->bridge, "mint", G_CALLBACK (mint_any), f);
+  g_signal_connect (f->bridge, "web-process-terminated", G_CALLBACK (on_terminated), f);
+  g_assert_true (busymate_bridge_install (f->bridge, f->view));
+
+  f->want_prefix = "done:";
+  webkit_web_view_load_uri (f->view, url);
+  first = run_page (f, NULL, NULL, "done:");
+  g_assert_true (json_object_get_boolean_member (json_object_get_object_member (first, "h"), "ok"));
+
+  g_assert_cmpuint (kill_web_processes (), >, 0);
+  after = run_page (f, NULL, NULL, "event:");
+  g_assert_cmpint (GPOINTER_TO_INT (g_object_get_data (G_OBJECT (f->bridge), "reason")), ==, WEBKIT_WEB_PROCESS_CRASHED + 1);
+  g_assert_true (json_object_has_member (after, "ev_restored"));
+  g_assert_true (json_object_get_boolean_member (json_object_get_object_member (after, "h"), "ok"));
+  g_assert_cmpstr (webkit_web_view_get_uri (f->view), ==, url);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -293,6 +404,7 @@ main (int argc, char **argv)
   g_test_add ("/webkit/bridge/other-host-not-injected", Fixture, NULL, fixture_setup, test_bridge_other_host_not_injected, fixture_teardown);
   g_test_add ("/webkit/microphone/granted", Fixture, NULL, fixture_setup, test_microphone_granted, fixture_teardown);
   g_test_add ("/webkit/microphone/denied", Fixture, NULL, fixture_setup, test_microphone_denied, fixture_teardown);
+  g_test_add ("/webkit/bridge/crash-restored", Fixture, NULL, fixture_setup, test_bridge_crash_restored, fixture_teardown);
   g_test_add ("/webkit/microphone/other-origin", Fixture, NULL, fixture_setup, test_microphone_other_origin, fixture_teardown);
   return g_test_run ();
 }
