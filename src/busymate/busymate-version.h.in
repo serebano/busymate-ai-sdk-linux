@@ -1,0 +1,10 @@
+/* Busymate AI SDK for Linux — distribution version.
+ */
+#pragma once
+
+#if !defined(BUSYMATE_INSIDE) && !defined(BUSYMATE_COMPILATION)
+#error "Only <busymate/busymate.h> can be included directly."
+#endif
+
+/** BUSYMATE_SDK_VERSION: the Linux SDK distribution version (not a wire version). */
+#define BUSYMATE_SDK_VERSION "@VERSION@"

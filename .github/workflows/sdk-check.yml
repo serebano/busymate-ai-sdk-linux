@@ -1,0 +1,78 @@
+name: SDK checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  sdk-check:
+    runs-on: ubuntu-24.04
+    env:
+      # CI only: GitHub's Ubuntu 24.04 runners restrict the unprivileged user
+      # namespaces WebKit's bubblewrap sandbox needs. Never set this in an app.
+      WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: '1'
+      GSK_RENDERER: cairo
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      WEBKIT_DISABLE_COMPOSITING_MODE: '1'
+      WEBKIT_DISABLE_DMABUF_RENDERER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain (GTK4, WebKitGTK 6.0, Meson)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            meson ninja-build gcc pkg-config \
+            libgtk-4-dev libwebkitgtk-6.0-dev libjson-glib-dev libsoup-3.0-dev \
+            gobject-introspection libgirepository1.0-dev gir1.2-gtk-4.0 gir1.2-webkit-6.0 python3-gi \
+            xvfb xauth dbus dbus-x11 at-spi2-core
+      - name: Toolchain versions
+        run: |
+          lsb_release -ds
+          meson --version
+          gcc --version | head -1
+          for p in gtk4 webkitgtk-6.0 json-glib-1.0 libsoup-3.0 gobject-introspection-1.0; do echo "$p $(pkg-config --modversion $p)"; done
+      - name: Verify immutable source
+        run: python3 scripts/verify-release.py
+      - name: Configure
+        run: meson setup _build --prefix=/usr --libdir=lib --buildtype=release -Dintrospection=enabled -Dwerror=true
+      - name: Build SDK, introspection data, tests and example app
+        run: meson compile -C _build
+      - name: Unit tests (message parsing, origin checks, example settings and mint client)
+        run: meson test -C _build --suite unit --print-errorlogs -v
+      - name: WebKitGTK integration tests under Xvfb
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost" \
+            -keyout "$RUNNER_TEMP/key.pem" -out "$RUNNER_TEMP/cert.pem" 2>/dev/null
+          export BUSYMATE_TEST_TLS_CERT="$RUNNER_TEMP/cert.pem" BUSYMATE_TEST_TLS_KEY="$RUNNER_TEMP/key.pem"
+          dbus-run-session -- xvfb-run -a -s "-screen 0 1280x1024x24" meson test -C _build --suite webkit --print-errorlogs -v
+      - name: Introspection (Python GI) check
+        run: |
+          GI_TYPELIB_PATH=_build/src LD_LIBRARY_PATH=_build/src xvfb-run -a python3 - <<'PY'
+          import gi
+          gi.require_version('Busymate', '1.0')
+          from gi.repository import Busymate
+          assert Busymate.normalize_origin('HTTPS://Acme.busymate.ai:443/') == 'https://acme.busymate.ai'
+          assert Busymate.allowed_origins('acme', ['https://support.acme.com', 'https://*.x.com']) == ['https://acme.busymate.ai', 'https://support.acme.com']
+          bridge = Busymate.Bridge.new('acme', None)
+          assert bridge.get_allowed_origins() == ['https://acme.busymate.ai']
+          print('GI ok:', Busymate.BRIDGE_BUILD, Busymate.MICROPHONE_ADAPTER)
+          PY
+      - name: Smoke-run the example app under Xvfb (loads the live guest chat)
+        run: dbus-run-session -- xvfb-run -a -s "-screen 0 1280x1024x24" timeout 150 _build/example-app/busymate-sdk-example --smoke-test
+      - name: Install, package and build a consumer against the installed SDK
+        run: |
+          DESTDIR="$PWD/dist/root" meson install -C _build
+          mkdir -p dist/pc
+          sed "s|^prefix=.*|prefix=$PWD/dist/root/usr|" dist/root/usr/lib/pkgconfig/busymate-ai-sdk-1.pc > dist/pc/busymate-ai-sdk-1.pc
+          gcc tests/consumer/consumer.c -o dist/consumer $(PKG_CONFIG_PATH="$PWD/dist/pc" pkg-config --cflags --libs busymate-ai-sdk-1)
+          LD_LIBRARY_PATH="$PWD/dist/root/usr/lib" dist/consumer
+          tar -C dist/root -czf "dist/busymate-ai-sdk-linux-1.0.0-ubuntu24.04-$(uname -m).tar.gz" usr
+          meson dist -C _build --no-tests --formats xztar --allow-dirty
+          cp _build/meson-dist/*.tar.xz* dist/
+          cp release-manifest.json dist/
+          (cd dist && sha256sum busymate-ai-sdk-linux-*.tar.* release-manifest.json > SHA256SUMS && cat SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: busymate-ai-sdk-linux-1.0.0
+          path: |
+            dist/busymate-ai-sdk-linux-*.tar.*
+            dist/release-manifest.json
+            dist/SHA256SUMS

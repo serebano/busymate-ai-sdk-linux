@@ -1,0 +1,3 @@
+option('introspection', type: 'feature', value: 'auto', description: 'Build GObject Introspection data (Busymate-1.0)')
+option('tests', type: 'boolean', value: true, description: 'Build the unit and WebKit integration tests')
+option('example', type: 'boolean', value: true, description: 'Build the GTK4 example app')
