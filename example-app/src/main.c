@@ -552,7 +552,7 @@ show_settings (void)
   demo.assistant_entry = GTK_ENTRY (add_row (GTK_GRID (grid), row++, "Assistant slug", gtk_entry_new (),
                                              "Bridge assistant: https://<slug>.busymate.ai may ask."));
   demo.chat_url_entry = GTK_ENTRY (add_row (GTK_GRID (grid), row++, "Chat HTTPS URL", gtk_entry_new (),
-                                            "Loaded in the WebKitGTK view; keep your tenant's query parameters (channel=desktop)."));
+                                            "Loaded in the WebKitGTK view; keep your tenant's query parameters (channel=desktop_sdk)."));
   demo.locale_entry = GTK_ENTRY (add_row (GTK_GRID (grid), row++, "Locale", gtk_entry_new (),
                                           "Sets the chat URL's locale parameter, e.g. en, de, pt-BR."));
   demo.origins_entry = GTK_ENTRY (add_row (GTK_GRID (grid), row++, "Exact HTTPS origins", gtk_entry_new (),

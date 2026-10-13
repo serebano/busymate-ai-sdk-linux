@@ -16,7 +16,7 @@ _build/example-app/busymate-sdk-example
 
 ## Try the live guest flow
 
-The default URL is the real hosted chat `https://busymate.ai/support/busyproxy?channel=desktop&locale=en`, with assistant slug `busyproxy` and the explicit extra origin `https://busymate.ai`. This is a guest support assistant, not an authenticated example workspace or a local stub; its availability, knowledge and enabled features belong to that tenant. `channel=desktop` is the hosted product's desktop-shell channel.
+The default URL is the real hosted chat `https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en`, with assistant slug `busyproxy` and the explicit extra origin `https://busymate.ai`. This is a guest support assistant, not an authenticated example workspace or a local stub; its availability, knowledge and enabled features belong to that tenant. `channel=desktop_sdk` is the hosted product's desktop-shell channel.
 
 Send a message, then tap dictation or voice if the hosted chat enables them. The adapter asks with its dialog only in response to that tap; the **Events** pane shows the permission step and WebKit's media decision. Real capture depends on your PipeWire/PulseAudio setup (see [microphone integration](../docs/microphone.md)).
 

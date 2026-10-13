@@ -1,19 +1,19 @@
 {
   "sdk": "Busymate AI linux",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "identityWire": {
     "v2": 2,
     "v2Build": "2.0.0"
   },
   "microphoneWire": 1,
   "microphoneAdapter": "1.0.0",
-  "chatChannel": "desktop",
+  "chatChannel": "desktop_sdk",
   "files": {
     "src/busymate-core.c": "e8cdc7dbf1d6a6a224599041e7a28e164e523d6bb8ac1471dd169abf45dca195",
     "src/busymate-scripts.c": "b4e9168d0e8784f3b91b3df3c57ecf2a3fe2c8aa8a5f2e80081c8a7fd065292a",
     "src/busymate-bridge.c": "8d581c2c8623759863d9b0e99d207870a5c1aa95c64edfac2ddc8ae5d0379803",
     "src/busymate-microphone.c": "0e88a59d4dbf6a784f3ff98a623121d84ede366054d996fae47430c3f1081141",
-    "src/busymate/busymate-core.h": "5128d798a7bc5b20e28a7f1e7ebe9c75551fa1269a07c9288b4b9cbe70cde608",
+    "src/busymate/busymate-core.h": "3cfbdd837f6cc73658744862e3534793751301128177e59494bda84dd308960f",
     "src/busymate/busymate-bridge.h": "910bb4ed7c7061acd1773e393aac77062250d472725dfa024d9c2696ea97a60f",
     "src/busymate/busymate-microphone.h": "09916d80daf51eaeb96fcf6ee99d88275e19ff09cc1f67cfd98ce328b54a46d1",
     "CONTRACT-v2.md": "c891b8bae48c87d5ae901de16df0594ba3879dd84ecd535e79120761d4220c1d"
