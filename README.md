@@ -1,4 +1,4 @@
-# Busymate AI SDK for Linux — 1.0.1
+# Busymate AI SDK for Linux — 1.0.2
 
 Official independent Linux SDK for Busymate AI hosted chat: a C library on GTK4 and WebKitGTK 6.0 (`webkitgtk-6.0`), built with Meson, with GObject Introspection data (`Busymate-1.0`) for Python, JavaScript (GJS), Vala and Rust bindings. It provides `BusymateBridge` (identity wire v2, immutable build 2.0.0) and `BusymateMicrophone` (microphone wire 1, adapter 1.0.0). There is no v1 identity bridge on Linux.
 
@@ -11,7 +11,7 @@ Requirements: GTK ≥ 4.10, WebKitGTK 6.0 ≥ 2.42, GLib ≥ 2.76, json-glib ≥
 ```ini
 [wrap-git]
 url = https://github.com/serebano/busymate-ai-sdk-linux.git
-revision = 1.0.1
+revision = 1.0.2
 depth = 1
 
 [provide]
@@ -20,7 +20,7 @@ busymate-ai-sdk-1 = busymate_dep
 
 then `dependency('busymate-ai-sdk-1', default_options: ['example=false', 'tests=false'])` in your `meson.build`.
 
-**System install.** `git clone --branch 1.0.1 --depth 1 https://github.com/serebano/busymate-ai-sdk-linux.git && cd busymate-ai-sdk-linux && meson setup _build -Dexample=false && meson compile -C _build && sudo meson install -C _build`. Consumers use `pkg-config busymate-ai-sdk-1` and `#include <busymate/busymate.h>`; the typelib is `Busymate-1.0`. The [1.0.1 release](https://github.com/serebano/busymate-ai-sdk-linux/releases/tag/1.0.1) also attaches the source tarball and an Ubuntu 24.04 x86_64 build of the library (`usr/` tree with headers, `.pc`, `.gir`, `.typelib`), with `SHA256SUMS`. No distribution package (deb/rpm/Flatpak module) is claimed.
+**System install.** `git clone --branch 1.0.2 --depth 1 https://github.com/serebano/busymate-ai-sdk-linux.git && cd busymate-ai-sdk-linux && meson setup _build -Dexample=false && meson compile -C _build && sudo meson install -C _build`. Consumers use `pkg-config busymate-ai-sdk-1` and `#include <busymate/busymate.h>`; the typelib is `Busymate-1.0`. The [1.0.2 release](https://github.com/serebano/busymate-ai-sdk-linux/releases/tag/1.0.2) also attaches the source tarball and an Ubuntu 24.04 x86_64 build of the library (`usr/` tree with headers, `.pc`, `.gir`, `.typelib`), with `SHA256SUMS`. No distribution package (deb/rpm/Flatpak module) is claimed.
 
 ## Integrate
 
@@ -55,10 +55,32 @@ _build/example-app/busymate-sdk-example
 
 The GTK4 example consumes the library from this repository. Its **Settings** dialog sets the chat URL, locale, exact origins, guest vs identified mode (the mint callback against your own HTTPS backend), the microphone adapter, close callbacks, `accountChanged()` and microphone revoke; the **Events** pane logs SDK callbacks without payloads. The default guest chat is `https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en`. See the [example guide](example-app/README.md).
 
+## Download the adapter
+
+`busymate-microphone.c` and `busymate-microphone.h` (microphone adapter 1.0.0, wire 1) ship in this SDK and are attached to every GitHub release, with `SHA256SUMS`:
+
+`busymate-microphone.c`:
+
+- Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.c
+- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.c
+
+`busymate-microphone.h`:
+
+- Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.h
+- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.h
+
+- Checksums: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/SHA256SUMS (`shasum -a 256 -c SHA256SUMS --ignore-missing`)
+
+This repository and its releases are the only source of the adapter. busymate.ai no longer publishes adapter copies; its legacy `https://busymate.ai/sdk/microphone/1.0.0/` files stay frozen for existing integrations.
+
+The SDK installs the adapter itself; the standalone file is for audit and vendoring.
+
 ## Build, test and versions
 
 `python3 scripts/verify-release.py`, then `meson setup _build -Dintrospection=enabled && meson compile -C _build && meson test -C _build`. The `webkit` test suite needs a display (use `xvfb-run`).
 
 CI (`sdk-check`, Ubuntu 24.04) builds the library, introspection data, tests and example; runs the unit tests (envelope parsing, origin checks, example settings and mint client with a loopback redirect test), WebKitGTK integration tests under Xvfb (a real web view talking to the bridge and microphone adapter through the isolated-world transport, origin refusals, and recovery after the web process is killed, over a local HTTPS server), a Python GI check, an Xvfb smoke run of the example against the live guest chat, and a consumer build against the installed SDK. It does not verify a real microphone, PipeWire capture, portal or Flatpak sandbox behaviour, or your backend identity flow: those need a physical Linux desktop.
 
-Distribution 1.0.1 differs from identity wire 2/build 2.0.0 and microphone wire 1/adapter 1.0.0. The [release manifest](release-manifest.json) pins the source hashes; new bytes require a new SDK version. This repository owns Linux SDK releases; human integration guides on [busymate.ai](https://busymate.ai/docs/guides/linux-sdk) are published by the hosted product. See the [changelog](CHANGELOG.md) and the [v2 wire contract](CONTRACT-v2.md).
+Distribution 1.0.2 differs from identity wire 2/build 2.0.0 and microphone wire 1/adapter 1.0.0. The [release manifest](release-manifest.json) pins the source hashes; new bytes require a new SDK version. This repository owns Linux SDK releases; human integration guides on [busymate.ai](https://busymate.ai/docs/guides/linux-sdk) are published by the hosted product. See the [changelog](CHANGELOG.md) and the [v2 wire contract](CONTRACT-v2.md).
+
+**Release process.** Every release attaches each `adapterAssets` file of the [release manifest](release-manifest.json) under its basename, plus `SHA256SUMS` covering every attached asset; `scripts/verify-release.py` checks the adapter hashes.
