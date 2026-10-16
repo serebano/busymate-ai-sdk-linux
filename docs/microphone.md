@@ -76,6 +76,26 @@ Verify on the desktops you support (at least one PipeWire system), with your pac
 
 The SDK's CI runs a real WebKitGTK web view under Xvfb that exercises the request/reply path, origin checks and shared prompts with a scripted permission handler. It does not run the dialog with a person, open a microphone, or exercise PipeWire, portals, Flatpak or Snap. Record those results with your own release.
 
+## Download the adapter
+
+`busymate-microphone.c` and `busymate-microphone.h` (microphone adapter 1.0.0, wire 1) ship in this SDK and are attached to every GitHub release, with `SHA256SUMS`:
+
+`busymate-microphone.c`:
+
+- Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.c
+- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.c
+
+`busymate-microphone.h`:
+
+- Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.h
+- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.h
+
+- Checksums: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/SHA256SUMS (`shasum -a 256 -c SHA256SUMS --ignore-missing`)
+
+This repository and its releases are the only source of the adapter. busymate.ai no longer publishes adapter copies; its legacy `https://busymate.ai/sdk/microphone/1.0.0/` files stay frozen for existing integrations.
+
+The SDK installs the adapter itself; the standalone file is for audit and vendoring.
+
 ## Platform references
 
 - [WebKitGTK: WebKitUserContentManager](https://webkitgtk.org/reference/webkitgtk/stable/class.UserContentManager.html) and [WebKitUserMediaPermissionRequest](https://webkitgtk.org/reference/webkitgtk/stable/class.UserMediaPermissionRequest.html)

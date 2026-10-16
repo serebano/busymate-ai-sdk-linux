@@ -6,7 +6,7 @@ for name,expected in m['files'].items():
     actual=hashlib.sha256((root/name).read_bytes()).hexdigest()
     assert actual==expected, f"Frozen source changed: {name}"
     print(f"verified {name} {actual}")
-assert m['version']=='1.0.1'
+assert m['version']=='1.0.2'
 
 # The distribution version is declared once more in meson.build; both must agree.
 meson=(root/'meson.build').read_text()
@@ -22,3 +22,14 @@ assert f'#define BUSYMATE_MICROPHONE_WIRE {m["microphoneWire"]}' in core
 assert f'#define BUSYMATE_MICROPHONE_ADAPTER "{m["microphoneAdapter"]}"' in core
 assert f'channel={m["chatChannel"]}' in core
 print('verified wire constants and chat channel')
+
+# Every release attaches each adapterAssets file under its basename (listed in the checksum file).
+adapters=m.get('adapterAssets') or []
+assert adapters, 'release-manifest.json must declare adapterAssets'
+names=[Path(a).name for a in adapters]
+assert len(set(names))==len(names), 'adapterAssets basenames must be unique'
+for a in adapters:
+    assert a in m['files'], f'adapter asset not pinned in files: {a}'
+    sha=hashlib.sha256((root/a).read_bytes()).hexdigest()
+    assert sha==m['files'][a], f'adapter asset hash differs: {a}'
+    print(f"verified adapter asset {Path(a).name} {sha}")

@@ -1,6 +1,6 @@
 {
   "sdk": "Busymate AI linux",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "identityWire": {
     "v2": 2,
     "v2Build": "2.0.0"
@@ -17,5 +17,9 @@
     "src/busymate/busymate-bridge.h": "910bb4ed7c7061acd1773e393aac77062250d472725dfa024d9c2696ea97a60f",
     "src/busymate/busymate-microphone.h": "09916d80daf51eaeb96fcf6ee99d88275e19ff09cc1f67cfd98ce328b54a46d1",
     "CONTRACT-v2.md": "c891b8bae48c87d5ae901de16df0594ba3879dd84ecd535e79120761d4220c1d"
-  }
+  },
+  "adapterAssets": [
+    "src/busymate-microphone.c",
+    "src/busymate/busymate-microphone.h"
+  ]
 }
