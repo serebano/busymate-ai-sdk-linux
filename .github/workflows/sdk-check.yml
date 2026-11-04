@@ -7,6 +7,7 @@ jobs:
     # Our ephemeral k3s runner (scale set ci-sdk-linux, class sdk: Ubuntu 24.04 with the GTK4 / WebKitGTK 6.0 /
     # Meson / Xvfb toolchain preinstalled, no sudo); never GitHub-hosted (owner order 2026-11-04).
     runs-on: ci-sdk-linux
+    timeout-minutes: 45
     env:
       # CI only: the runner pod has no unprivileged user namespaces, which
       # WebKit's bubblewrap sandbox needs. Never set this in an app.
