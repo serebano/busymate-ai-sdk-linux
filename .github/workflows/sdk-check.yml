@@ -4,10 +4,12 @@ permissions:
   contents: read
 jobs:
   sdk-check:
-    runs-on: ubuntu-24.04
+    # Our ephemeral k3s runner (scale set ci-sdk-linux, class sdk: Ubuntu 24.04 with the GTK4 / WebKitGTK 6.0 /
+    # Meson / Xvfb toolchain preinstalled, no sudo); never GitHub-hosted (owner order 2026-11-04).
+    runs-on: ci-sdk-linux
     env:
-      # CI only: GitHub's Ubuntu 24.04 runners restrict the unprivileged user
-      # namespaces WebKit's bubblewrap sandbox needs. Never set this in an app.
+      # CI only: the runner pod has no unprivileged user namespaces, which
+      # WebKit's bubblewrap sandbox needs. Never set this in an app.
       WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: '1'
       GSK_RENDERER: cairo
       LIBGL_ALWAYS_SOFTWARE: '1'
@@ -15,14 +17,13 @@ jobs:
       WEBKIT_DISABLE_DMABUF_RENDERER: '1'
     steps:
       - uses: actions/checkout@v4
-      - name: Install toolchain (GTK4, WebKitGTK 6.0, Meson)
+      - name: No GitHub-hosted runners (runs-on lint)
+        run: python3 .github/runs-on-lint.py
+      - name: Toolchain present (GTK4, WebKitGTK 6.0, Meson; preinstalled in runner class sdk)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            meson ninja-build gcc pkg-config \
-            libgtk-4-dev libwebkitgtk-6.0-dev libjson-glib-dev libsoup-3.0-dev \
-            gobject-introspection libgirepository1.0-dev gir1.2-gtk-4.0 gir1.2-webkit-6.0 python3-gi \
-            xvfb xauth dbus dbus-x11 at-spi2-core
+          for c in meson ninja gcc pkg-config xvfb-run dbus-run-session g-ir-compiler; do command -v "$c" >/dev/null || { echo "::error::missing $c"; exit 1; }; done
+          pkg-config --exists gtk4 webkitgtk-6.0 json-glib-1.0 libsoup-3.0 gobject-introspection-1.0
+          python3 -c 'import gi'
       - name: Toolchain versions
         run: |
           lsb_release -ds
