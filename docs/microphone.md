@@ -83,14 +83,14 @@ The SDK's CI runs a real WebKitGTK web view under Xvfb that exercises the reques
 `busymate-microphone.c`:
 
 - Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.c
-- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.c
+- Pinned, SDK 1.0.4: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.4/busymate-microphone.c
 
 `busymate-microphone.h`:
 
 - Latest release: https://github.com/serebano/busymate-ai-sdk-linux/releases/latest/download/busymate-microphone.h
-- Pinned, SDK 1.0.2: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/busymate-microphone.h
+- Pinned, SDK 1.0.4: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.4/busymate-microphone.h
 
-- Checksums: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.2/SHA256SUMS (`shasum -a 256 -c SHA256SUMS --ignore-missing`)
+- Checksums: https://github.com/serebano/busymate-ai-sdk-linux/releases/download/1.0.4/SHA256SUMS (`shasum -a 256 -c SHA256SUMS --ignore-missing`)
 
 This repository and its releases are the only source of the adapter. busymate.ai no longer publishes adapter copies; its legacy `https://busymate.ai/sdk/microphone/1.0.0/` files stay frozen for existing integrations.
 
