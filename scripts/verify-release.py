@@ -6,7 +6,7 @@ for name,expected in m['files'].items():
     actual=hashlib.sha256((root/name).read_bytes()).hexdigest()
     assert actual==expected, f"Frozen source changed: {name}"
     print(f"verified {name} {actual}")
-assert m['version']=='1.0.2'
+assert m['version']=='1.0.4'
 
 # The distribution version is declared once more in meson.build; both must agree.
 meson=(root/'meson.build').read_text()

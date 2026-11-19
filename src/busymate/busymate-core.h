@@ -32,7 +32,7 @@ G_BEGIN_DECLS
  * (`desktop` is reserved for Busymate's own Console app; `embed` needs a parent frame). */
 #define BUSYMATE_CHANNEL "desktop_sdk"
 /** BUSYMATE_DEFAULT_CHAT_URL: the public guest support chat used by the example. */
-#define BUSYMATE_DEFAULT_CHAT_URL "https://busymate.ai/support/busyproxy?channel=desktop_sdk&locale=en"
+#define BUSYMATE_DEFAULT_CHAT_URL "https://busymate.ai/chat/w/busyproxy?channel=desktop_sdk&locale=en"
 
 char  *busymate_normalize_origin      (const char         *origin);
 char **busymate_allowed_origins       (const char         *assistant,

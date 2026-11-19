@@ -160,7 +160,7 @@ test_bridge_allowed (Fixture *f, gconstpointer data)
   g_signal_connect (f->bridge, "close", G_CALLBACK (on_close), f);
   g_assert_true (busymate_bridge_install (f->bridge, f->view));
 
-  out = run_page (f, BRIDGE_PAGE, "https://acme.busymate.ai/support", "done:");
+  out = run_page (f, BRIDGE_PAGE, "https://acme.busymate.ai/chat/w", "done:");
   g_assert_cmpstr (json_object_get_string_member (out, "pageSeesHandler"), ==, "undefined");
   g_assert_cmpstr (json_object_get_string_member (out, "hasBridge"), ==, "object");
 
