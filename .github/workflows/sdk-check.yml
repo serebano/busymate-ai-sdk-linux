@@ -17,7 +17,7 @@ jobs:
       WEBKIT_DISABLE_COMPOSITING_MODE: '1'
       WEBKIT_DISABLE_DMABUF_RENDERER: '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: No GitHub-hosted runners (runs-on lint)
         run: python3 .github/runs-on-lint.py
       - name: Toolchain present (GTK4, WebKitGTK 6.0, Meson; preinstalled in runner class sdk)
@@ -73,7 +73,7 @@ jobs:
           # Release adapter assets (release-manifest.json adapterAssets), attached under their basenames.
           cp src/busymate-microphone.c src/busymate/busymate-microphone.h dist/
           (cd dist && sha256sum busymate-ai-sdk-linux-*.tar.* busymate-microphone.c busymate-microphone.h release-manifest.json > SHA256SUMS && cat SHA256SUMS)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: busymate-ai-sdk-linux-1.0.4
           path: |
